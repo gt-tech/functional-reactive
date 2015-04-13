@@ -1,3 +1,8 @@
+.git/
+.metadata/
+**/target/
+**/.cache
+**/bin/
 *.class
 
 # Mobile Tools for Java (J2ME)
