@@ -1,25 +1,26 @@
 package quickcheck
 
 import org.scalatest.FunSuite
-
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-
 import org.scalatest.prop.Checkers
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Prop
 import org.scalacheck.Prop._
-
 import org.scalatest.exceptions.TestFailedException
+import org.scalacheck.Test.Parameters
 
 object QuickCheckBinomialHeap extends QuickCheckHeap with BinomialHeap
 
 @RunWith(classOf[JUnitRunner])
-class QuickCheckSuite extends FunSuite with ch.epfl.lamp.grading.GradingSuite with Checkers {
+class QuickCheckSuite extends FunSuite /* with ch.epfl.lamp.grading.GradingSuite*/ with Checkers {
+  object testParameters extends Parameters.Default {
+    override val minSuccessfulTests = 1000
+  }
   def checkBogus(p: Prop) {
     var ok = false
     try {
-      check(p)
+      check(p, testParameters)
     } catch {
       case e: TestFailedException =>
         ok = true
@@ -28,7 +29,7 @@ class QuickCheckSuite extends FunSuite with ch.epfl.lamp.grading.GradingSuite wi
   }
 
   test("Binomial heap satisfies properties.") {
-    check(new QuickCheckHeap with BinomialHeap)
+    check(new QuickCheckHeap with BinomialHeap, testParameters)
   }
 
   test("Bogus (1) binomial heap does not satisfy properties.") {
