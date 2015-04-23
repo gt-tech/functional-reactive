@@ -17,7 +17,16 @@ object Calculator {
   def eval(expr: Expr, references: Map[String, Signal[Expr]]): Double = {
     expr match {
       case Literal(x) => x
-      case Ref(name) => eval(getReferenceExpr(name, references), references)
+      case Ref(name) => /*eval(getReferenceExpr(name, references), references)*/ 
+        {
+          val e = getReferenceExpr(name, references)
+          // check the returned value for comparison for cyclic references
+          val result = e match {
+            case Ref(new_name) if ( new_name == name ) => Literal(Double.NaN)
+            case _ => e
+          }
+          eval(result, references)
+        }
       case Plus(a, b) => eval(a, references) + eval(b, references) 
       case Minus(a, b) => eval(a, references) - eval(b, references) 
       case Times(a, b) => eval(a, references) * eval(b, references) 
