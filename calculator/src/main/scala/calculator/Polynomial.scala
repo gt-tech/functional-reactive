@@ -9,6 +9,7 @@ object Polynomial {
 
   def computeSolutions(a: Signal[Double], b: Signal[Double],
                        c: Signal[Double], delta: Signal[Double]): Signal[Set[Double]] = {
+    
     Signal {
       var result: Set[Double] = Set()
       // (-b ± √Δ) / (2a)
