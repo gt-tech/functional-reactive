@@ -1,12 +1,12 @@
 package nodescala
 
 import scala.language.postfixOps
-import scala.util.{Try, Success, Failure}
+import scala.util.{ Try, Success, Failure }
 import scala.collection._
 import scala.concurrent._
 import ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-import scala.async.Async.{async, await}
+import scala.async.Async.{ async, await }
 import org.scalatest._
 import NodeScala._
 import org.junit.runner.RunWith
@@ -28,6 +28,29 @@ class NodeScalaSuite extends FunSuite {
       assert(false)
     } catch {
       case t: TimeoutException => // ok!
+    }
+  }
+
+  test("A Future should not complete after 2s when using a delay of 5s") {
+    try {
+      val p = Promise[Unit]()
+      val f = async {
+        Future.delay(5 second)
+      }
+      f.onComplete {
+        case _ => {
+          try {
+            p.success(())
+          } catch {
+            case _: Exception => assert(false) // we shouldn't hit this
+          }
+        }
+      }
+
+      Await.result(p.future, 2 second) // block for future to complete
+      assert(false)
+    } catch {
+      case _: TimeoutException => // Ok!
     }
   }
 
