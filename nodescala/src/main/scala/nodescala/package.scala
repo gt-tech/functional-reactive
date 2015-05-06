@@ -67,12 +67,18 @@ package object nodescala {
     /**
      * Returns a future with a unit value that is completed after time `t`.
      */
-    def delay(t: Duration): Future[Unit] = try {
-      blocking { // blocking thread used for ensuring that blocking computation occurs in a different thread for efficiency
-        Await.result(Future.never, t) // since we have given never, it will never complete, 2nd argument would result in time out to occur and throw an exception from where we return unit feature
+    def delay(t: Duration): Future[Unit] = {
+      val p = Promise[Unit]()
+      Future {
+        try {
+          blocking { 
+            Await.result(Future.never, t) 
+          }
+        } catch {
+          case _: TimeoutException => p.completeWith(Future[Unit](Unit))
+        }
       }
-    } catch {
-      case _: TimeoutException => Future[Unit](Unit)
+      p.future
     }
 
     /**
@@ -92,7 +98,6 @@ package object nodescala {
       f(sub.cancellationToken)
       sub
     }
-    
 
   }
 
@@ -145,7 +150,7 @@ package object nodescala {
      *  The resulting future contains a value returned by `cont`.
      */
     def continue[S](cont: Try[T] => S): Future[S] = {
-       val p = Promise[S]()
+      val p = Promise[S]()
       f.onComplete {
         case tryValue =>
           try {
